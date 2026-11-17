@@ -39,12 +39,10 @@ continuous sequence with the same participants and cumulative history.
 A **game** contains its participants, portfolios, phases, and result history.
 A **phase** applies one scenario over a sequence of market periods. A **period**
 is one market-clearing auction. New phases contain six periods, with displayed
-period numbering restarting at 1. Some older games may contain fewer periods.
+period numbering restarting at 1.
 
 Each period is cleared independently. There are no ramping constraints,
 intertemporal operating decisions, or energy inventories linking auctions.
-However, installed capacity, scenario settings, and cumulative reporting can
-carry information or decisions across periods.
 
 Capacity, offered quantity, and dispatch are expressed in **MW**. Bid prices
 and marginal costs are expressed in **€/MWh**. Financial calculations use a
