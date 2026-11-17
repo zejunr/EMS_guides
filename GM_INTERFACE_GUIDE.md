@@ -385,7 +385,7 @@ game before running its auctions.
 For what is inherited and how histories remain separate, see
 [GM Guide, Section 18](GM_GUIDE.md#18-portfolio-inheritance-and-experiment-continuity).
 
-## 13. Enable Market Coach
+## 13. Enable Market Coach (Not very usefull currently)
 
 Select the game and find **Market Coach**. Check **Enable Market Coach** and
 wait for **Market Coach enabled.** Uncheck it to disable feedback for that game.
@@ -418,7 +418,7 @@ LNG announcements are configured separately through
 
 ## 15. Help students recover a Player Code
 
-Email recovery requires the platform administrator to configure delivery.
+Students can recover their Player Code by email after verifying their recovery address.
 Have students verify their address while they still have access:
 
 1. In Portfolio or the enrollment waiting screen, find **Player Code recovery**.
