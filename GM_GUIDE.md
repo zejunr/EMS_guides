@@ -11,7 +11,7 @@ Individual games retain their saved settings, which may differ from the defaults
 The Energy Market Game is a classroom simulation in which each student or
 team manages a Generator Company (GENCO). Repeated auctions connect students'
 offers and investment decisions with dispatch, market prices, and profitability.
-Students can examine why a high price need not produce a high profit and why
+Students can examine why a high price does not necessarily produce a high profit and why
 equal starting capacity does not guarantee equal economic opportunities.
 
 This guide explains the purpose of the features, their economic assumptions,
