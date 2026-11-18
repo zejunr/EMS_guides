@@ -2,7 +2,7 @@
 
 ## Economic Intuition, Assumptions, and KPI Methodology
 
-**Edition:** 17 November 2026 — browser and iOS platform, including three-block
+**Edition:** 18 November 2026 — browser and iOS platform, including three-block
 bidding, euro leaderboard scoring, and optional Market Coach feedback.
 Individual games retain their saved settings, which may differ from the defaults.
 
@@ -11,7 +11,7 @@ Individual games retain their saved settings, which may differ from the defaults
 The Energy Market Game is a classroom simulation in which each student or
 team manages a Generator Company (GENCO). Repeated auctions connect students'
 offers and investment decisions with dispatch, market prices, and profitability.
-Students can examine why a high price does not necessarily produce a high profit and why
+Students can examine why a high price need not produce a high profit and why
 equal starting capacity does not guarantee equal economic opportunities.
 
 This guide explains the purpose of the features, their economic assumptions,
@@ -39,10 +39,12 @@ continuous sequence with the same participants and cumulative history.
 A **game** contains its participants, portfolios, phases, and result history.
 A **phase** applies one scenario over a sequence of market periods. A **period**
 is one market-clearing auction. New phases contain six periods, with displayed
-period numbering restarting at 1.
+period numbering restarting at 1. Some older games may contain fewer periods.
 
 Each period is cleared independently. There are no ramping constraints,
 intertemporal operating decisions, or energy inventories linking auctions.
+However, installed capacity, scenario settings, and cumulative reporting can
+carry information or decisions across periods.
 
 Capacity, offered quantity, and dispatch are expressed in **MW**. Bid prices
 and marginal costs are expressed in **€/MWh**. Financial calculations use a
@@ -83,24 +85,39 @@ The technology-specific limits and marginal-cost sampling ranges are:
 The common 400 MW portfolio total further restricts feasible combinations;
 the individual ranges are not independent capacity entitlements.
 
-Candidate portfolios also pass a quality screen. Define a reference margin:
+Candidate portfolios pass an initial balance screen. The app calculates a
+reference margin for each portfolio:
 
 $$
 M_i=\sum_{g\in G_i}P_g^{base}\max(100-c_g^{base},0),
 $$
 
-where $G_i$ is the set of generators owned by GENCO $i$. The quality score is:
+Here, $G_i$ contains GENCO $i$'s generators, $P_g^{base}$ is capacity in MW,
+and $c_g^{base}$ is marginal cost in €/MWh. Each generator's contribution
+assumes full-capacity production for one hour at a reference price of
+100 €/MWh. Generators costing at least that price contribute zero; the
+screen does not assume they operate at a loss.
 
-$$
-Q_i=0.45\frac{\sum_{g\in G_i}P_g^{base}}{400}
-+0.55\frac{M_i}{20{,}000}.
-$$
+For example, 200 MW of coal at 25 €/MWh contributes 15,000 €, and 200 MW of
+gas at 80 €/MWh contributes 4,000 €. The portfolio's reference margin is
+therefore $M_i=19{,}000$ €.
 
-Candidates are accepted when $0.70\leq Q_i\leq1.35$. The reference price of
-100 €/MWh and margin of 20,000 € are initialization parameters, not forecasts
-of clearing prices or guaranteed earnings. Because candidate portfolios are
-screened, the accepted portfolios are not unrestricted independent uniform
-draws. The stored generation seed makes initialization reproducible.
+**For the current 400 MW starting portfolios, the screen accepts reference
+margins between approximately 9,091 € and 32,727 €.** These displayed bounds
+are rounded to the nearest euro. A candidate below the lower limit or above
+the upper limit is rejected. The app draws another technology mix, capacity
+allocation, and set of costs while keeping the chosen number of generators.
+
+These are chosen initialization limits intended to reduce extreme starting
+advantages and disadvantages. They are not derived from an economic law and
+do not guarantee equal profit opportunities. The screen is a reference-price
+calculation, not a market clearing: it does not account for competing offers,
+demand, or whether the assumed production would be dispatched. Later cost
+shocks and market conditions can change the relative value of the portfolios.
+
+Screening also means that the accepted technology and cost combinations are
+not unrestricted independent uniform draws. The stored generation seed makes
+initialization reproducible.
 
 ### 3.2 Persistence and effective parameters
 
@@ -184,13 +201,13 @@ $$
 At $\alpha_t=0.80$, maximum demand is 12,800 MW.
 
 With growth switched off, the default six-period multipliers $\alpha_t$ for
-Normal and LNG phases are
+Normal and LNG crisis phases are
 **1.02, 0.65, 0.80, 0.90, 0.95, and 0.75**. These are fixed initialization
 settings, not random draws. They do not imply a specified probability of
 scarcity. Existing games retain their saved values.
 
 When the GM enables the extra growth option, the affected demand quantities
-instead follow the saved growth path in Section 5.4. The fixed period factors
+instead follow the saved demand growth sequence in Section 5.4. The fixed period factors
 do not continue to determine each of those periods independently.
 
 ### 5.2 Inelastic and elastic components
@@ -233,7 +250,7 @@ fixed settlement price nor the generator bid-price ceiling.
 **With growth switched off**, individual period demand can be edited while
 the period is waiting or bidding is open; closing bidding locks it.
 
-**With growth switched on**, the saved path replaces individual demand edits.
+**With growth switched on**, the saved sequence replaces individual demand edits.
 Its baseline controls and locking rules are described in Section 5.4.
 Both modes use the same saved period demand for actual and perfect-competition
 clearing.
@@ -247,14 +264,14 @@ is served. These distinctions matter when interpreting scarcity.
 
 Investment purchases do not automatically expand demand in either mode.
 Late-admission recalculation applies to eligible capacity-scaled periods,
-not to saved growth-managed periods. See Sections 15 and 16.
+not to saved growth-managed periods. See Sections 13 and 14.
 
 ### 5.4 Optional demand growth: 3% expected increase
 
 **Demand growth is an extra option that the GM must turn on.** It is available
 in Normal Market, LNG Crisis and Capacity Investment. New games start with it
 switched off; selecting a scenario alone does not enable it. Once enabled in
-a game, its later appended phases automatically continue that path. Games
+a game, its later appended phases automatically continue that sequence. Games
 with growth off keep the capacity-scaled settings described in Section 5.1.
 
 The purpose is to introduce an upward demand trend with uncertainty, so that
@@ -268,16 +285,22 @@ The GM chooses a starting demand baseline as a percentage of recorded starting
 capacity. Writing that baseline as $D_{base}$:
 
 $$
-D_{base}=\beta C_{start},\qquad
+D_{base}=\beta C_{ref},\qquad
 g_t\sim U(-0.02,0.08),\qquad
 D_t^0=D_{t-1}^0(1+g_t).
 $$
 
-Here, $\beta$ is the GM's chosen baseline fraction, $C_{start}$ is the recorded
-starting capacity, and $g_t$ is an independent growth draw. For a newly enabled
-path, the first draw applies to Period 1 using $D_{base}$ as its predecessor.
-Older saved paths may instead retain Period 1 as their anchor and start drawing
-from Period 2; the saved growth table identifies the actual starting point.
+Here, $\beta$ is the GM's chosen baseline fraction, $C_{ref}$ is the reference
+installed capacity, and $g_t$ is an independent growth draw. For demand growth,
+$C_{ref}$ is fixed when the demand growth sequence is initialized. Later
+capacity additions do not rescale the baseline.
+
+The **demand growth sequence** is the series of demand levels obtained by
+applying each period's growth rate to the previous demand level. For a newly
+enabled sequence, the first draw applies to Period 1 using $D_{base}$ as its
+predecessor. Older saved
+sequences may instead retain Period 1 as their anchor and start drawing from
+Period 2; the saved growth table identifies the actual starting point.
 
 The expected rate is the midpoint of the distribution:
 
@@ -295,20 +318,20 @@ the draws actually used rather than assuming the total increase is 3%.
 The saved quantities are maximum, zero-price demand, not necessarily the
 quantity that clears. Both the 80% high-value component and the 20% flexible
 component grow together. Their valuation prices and the common clearing model
-are unchanged. Actual and perfect-competition clearing use the same demand path.
+are unchanged. Actual and perfect-competition clearing use the same demand sequence.
 
 Growth rates and demand quantities are drawn once and saved. Restarting the
 server does not redraw them. Adding another phase to the same game continues
 from the preceding phase's final demand and applies a new draw to its first
 period, even though the displayed period number restarts at 1. Adding supply
-through investment or late admission does not inflate this saved demand path.
+through investment or late admission does not inflate this saved demand sequence.
 
 Growth-managed periods use the saved absolute quantities. An unused baseline
 can be rescaled before its first affected period opens without redrawing rates.
 A baseline taken from a released period remains fixed. Once growth bidding
-begins, later phases extend the path without revising completed results.
+begins, later phases extend the sequence without revising completed results.
 Scarcity and profitable investment are possible outcomes, not guaranteed ones.
-For enabling, saving, and restoring a path, see the
+For enabling, saving, and restoring a demand growth sequence, see the
 [demand controls](GM_INTERFACE_GUIDE.md#7-choose-the-demand-settings).
 
 ## 6. Discretization of elastic demand
@@ -337,8 +360,10 @@ continuous curve need not coincide exactly with the discrete auction outcome.
 
 ## 7. Actual market-clearing model
 
-The market is a single-node, uniform-price auction. The same linear
-optimization model is used in all scenarios.
+The market is cleared using a **single-node, bid-based economic dispatch
+model with uniform-price settlement**. Actual dispatch uses students'
+submitted offer prices and quantities. The same linear optimization model
+is used in all scenarios.
 
 In addition to the offer notation in Section 4, define:
 
@@ -408,11 +433,6 @@ The market-clearing price (MCP), denoted $\lambda_t$, is obtained from the
 dual value of the energy-balance constraint, using the solver's consistent
 sign convention.
 
-All dispatched supply is paid the same MCP. This is a uniform-price
-settlement, not a pay-as-bid settlement. The MCP is not necessarily identical
-to the highest accepted supply bid: elastic demand and non-unique dual
-solutions can affect the reported price.
-
 When no trade occurs, the application reports **No trade**, with no MCP,
 rather than assigning an artificial settlement price.
 
@@ -459,7 +479,7 @@ q_{g,t}^{PC}=P_{g,t}^{max}.
 $$
 
 Thus, every generator offers its full effective capacity at its effective
-marginal cost. The benchmark includes LNG cost adjustments and finalized
+marginal cost. The benchmark includes LNG crisis cost adjustments and finalized
 investment capacity.
 
 It does not preserve actual block quantities, markups, or withholding.
@@ -472,31 +492,12 @@ every other student's strategy remains fixed. The application may use
 “truthful” in internal field names; in this guide, these outputs are called
 perfect-competition results.
 
-## 11. Strategic performance in euros
+## 11. KPIs, performance, and leaderboards
 
-For GENCO $i$, the period's strategic-performance measure is:
-
-$$
-A_{i,t}=\Pi_{i,t}^{actual,operating}
--\Pi_{i,t}^{PC,operating}.
-$$
-
-Positive values indicate operating profit above the benchmark; negative
-values indicate operating profit below it. Cumulative strategic performance
-sums these monetary differences over the relevant recorded periods:
-
-$$
-A_{i,cumulative}=\sum_t A_{i,t}.
-$$
-
-This comparison does not establish that one student's decision caused the
-difference, or that the student's strategy was optimal. The counterfactual
-changes the whole market. Investment capacity charges are excluded from
-this operating-profit comparison. The symbol $A$ distinguishes this
-analytical indicator from the scenario-dependent leaderboard score $S$ in
-Section 13.
-
-## 12. KPI definitions and aggregation
+The GM company and generator tables report monetary results in euros per
+trading round. A round represents one hour, so revenue and production cost
+use the dispatched energy for that hour. Profit-per-capacity rates are no
+longer displayed in these tables.
 
 | Indicator | Definition |
 |---|---|
@@ -510,63 +511,55 @@ Section 13.
 | Variable production cost | Effective marginal cost multiplied by dispatched energy, summed over generators |
 | Operating profit | Revenue minus variable production cost |
 | Net profit | Operating profit minus applicable Investment capacity charges |
-| Operating profit per MW of capacity | Operating profit divided by effective period portfolio capacity |
-| Strategic performance | Actual minus PC operating profit, in euros |
-| Difference versus PC per MW capacity | Actual minus PC capacity-normalized rates, as defined below |
-| Cumulative operating profit | Sum of operating profits over the included periods |
+| Passive profit | Profit from the student's individual passive market, defined in Section 11.3 |
+| Performance score | The scenario-specific euro difference defined in Section 11.1 |
+| Cumulative operating profit | Sum of operating profits across the relevant rounds |
 
-These definitions describe the available calculations; not every diagnostic
-appears on every screen. Capacity, offered quantity, and dispatch are distinct
-and should not be used interchangeably.
+A GENCO's revenue, generation cost, and operating profit aggregate its
+generators' monetary outcomes. Capacity, offered quantity, and dispatch remain
+distinct physical quantities. Investment capacity charges and passive
+performance are evaluated at company level; generator rows retain actual
+and perfect-competition financial details.
 
-### 12.1 Profit per MW of capacity
+The company's **Performance** value and its current-period leaderboard score
+are the same value. Positive values are shown in green and negative values in
+red. A genuine zero is reported as zero; a missing benchmark makes performance
+unavailable (**N/A**), rather than substituting zero or another benchmark.
+Zero dispatch alone does not make a score unavailable.
 
-The reported normalized rate divides operating profit by effective portfolio
-capacity for the period, rounded to two decimals. This keeps actual and
-perfect-competition outcomes comparable even when dispatch is below available
-capacity.
+A class summary labelled **Sum of individual passive profits** adds profits
+from separate student-specific hypothetical markets. It is not the total
+profit from one shared passive market.
 
-For generator or GENCO $x$ in period $t$, let $K_{x,t}$ be effective capacity:
+### 11.1 Performance score by scenario
 
-$$R^{cap}_{x,t}=R_2\left(\frac{\Pi_{x,t}^{operating}}{K_{x,t}}\right),\qquad
-R^{cap,PC}_{x,t}=R_2\left(\frac{\Pi_{x,t}^{PC}}{K_{x,t}}\right).$$
+For Normal and LNG crisis periods, **Performance vs perfect competition** compares
+actual operating profit with the all-generator perfect-competition outcome
+defined in Section 10:
 
-The signed difference used by the GM analytical KPI is calculated from the
-underlying profits and rounded once:
+$$
+S_{i,t}=\Pi^{actual,operating}_{i,t}-\Pi^{PC,operating}_{i,t}.
+$$
 
-$$\Delta^{cap}_{x,t}=R_2\left(\frac{\Pi_{x,t}^{operating}-\Pi_{x,t}^{PC}}{K_{x,t}}\right).$$
+For Investment periods, **Performance vs passive** compares actual net profit,
+after capacity charges, with the individual passive outcome in Section 11.3:
 
-Leaderboard scoring is denominated in euros and defined separately in
-Section 13; it does not sum these normalized KPI values.
+$$
+S_{i,t}=\Pi^{actual,net}_{i,t}-\Pi^{passive}_{i,t}.
+$$
 
-With positive effective capacity, zero dispatch yields zero operating profit
-and therefore a zero capacity-normalized rate. Both company and generator KPI
-tables use the capacity-based definition. Independently rounded displayed
-rates can differ by 0.01 from the normalized difference calculated from
-underlying profits. Missing values are unavailable rather than imputed zeros.
-Some interface columns retain the label "/MWh"; their implemented denominator
-is effective available capacity, as defined here.
+These are euro amounts per round, with no division by capacity or dispatch.
+A positive score means the recorded result exceeded the applicable benchmark;
+a negative score means it fell short. Neither score establishes that the
+student's strategy was optimal. The Investment score evaluates bidding and
+investment together.
 
-For example, zero actual operating profit compared with PC operating profit
-of 16,000 € on 400 MW produces $\Delta^{cap}=-40$ €/MW of capacity.
+### 11.2 Ranking and cumulative scores
 
-### 12.2 Company rates versus generator rates
+The current-period leaderboard sorts the scores in Section 11.1 from highest
+to lowest. The GM sees euro values; students see rankings only.
 
-A company's rate uses its **total operating profit divided by total effective
-capacity** for the period. It is not the sum or simple average of generator
-rates. Before rounding, it is a capacity-weighted average of those rates.
-Actual and PC calculations use the same effective capacities. A company's
-comparison therefore need not equal an individual generator's comparison,
-even when the monetary totals reconcile.
-
-## 13. Leaderboard methodology
-
-The current-period leaderboard ranks GENCOs by their euro score $S_{i,t}$ in
-descending order. Higher signed values rank higher. The score uses the
-scenario-specific formula in Section 13.1; the capacity-normalized analytical
-KPIs in Section 12 remain available separately.
-
-Cumulative ranking sums the euro scores:
+Cumulative ranking sums the performance scores:
 
 $$
 S_{i,cumulative}(T)=
@@ -580,7 +573,7 @@ student, for example to keep a practice round out of the cumulative score.
 Exclusion does not change accounts, market results, or current-period rankings.
 
 This is a sum of period scores. It is not an average or a rate calculated by
-dividing cumulative profit by cumulative energy. Normal and LNG scores use
+dividing cumulative profit by cumulative energy. Normal and LNG crisis scores use
 operating profit. Investment scores use net profit after capacity charges
 relative to the individual passive benchmark described below.
 
@@ -595,35 +588,10 @@ have no results for earlier periods.
 
 The current-period score is defined once clearing is complete; cumulative
 scores include released periods only. The information made available to
-students is described in Section 19. To select scoring rounds, use the
+students is described in Section 17. To select scoring rounds, use the
 [leaderboard controls](GM_INTERFACE_GUIDE.md#leaderboard).
 
-### 13.1 Euro score by scenario
-
-For Normal and LNG periods, the leaderboard score is the student's actual
-operating profit minus the operating profit from a full-capacity,
-perfect-competition dispatch using the same saved demand and effective costs:
-
-$$
-S_{i,t}=\Pi^{actual,operating}_{i,t}-\Pi^{PC,operating}_{i,t}.
-$$
-
-For Investment periods, the benchmark is an individual passive counterfactual.
-It keeps the student's original game-start generators, makes no new capacity
-purchases, offers that baseline at effective marginal cost, and leaves all
-other students' saved offers and investments unchanged:
-
-$$
-S_{i,t}=\Pi^{actual,net}_{i,t}-\Pi^{passive}_{i,t}.
-$$
-
-The passive benchmark uses the same market-clearing engine and saved demand.
-It is persisted when the period clears, so it is not redrawn after a restart.
-Later Investment phases retain the same original baseline. A positive score
-means the student's recorded outcome exceeded the selected benchmark; it is
-not a claim that a different bid would necessarily have produced that score.
-
-### 13.2 Why use an individual passive benchmark for Investment?
+### 11.3 Why use an individual passive benchmark for Investment?
 
 The benchmark asks: **Given what the other students actually did, did this
 GENCO earn more through its bidding and investment decisions than it would
@@ -650,34 +618,31 @@ and changing offers can affect the clearing price and dispatch, so passive
 profit uses the hypothetical market's own price and accepted quantities.
 Passive profit is revenue minus production costs, with no charges for new
 capacity because the passive student purchases none. Actual net profit
-includes the student's applicable investment capacity charges.
+includes the student's applicable investment capacity charges. The benchmark
+is saved when the round clears and remains available after restart. Later
+Investment phases retain the same original game-start baseline.
 
-A positive Investment score means actual net profit exceeded passive profit;
-a negative score means it fell short. A student who buys no capacity and
+A student who buys no capacity and
 offers the original portfolio in full at effective marginal cost should have
 a score of approximately zero, subject to numerical precision. The score
 evaluates bidding and investment together. It cannot attribute the difference
 solely to an investment decision or identify an optimal strategy.
 
-**Accumulating scores across rounds** lets the GM assess a sequence of
-decisions over the experiment. Capacity can earn different returns as demand,
-costs, and classmates' offers change. An investment can fall behind the
-passive outcome in one round and exceed it in a later round. The cumulative
-leaderboard adds those signed euro differences across the selected released
-rounds, including applicable capacity charges in each Investment round. It
-does not guarantee that investing will pay off. The original passive baseline
-is retained across later Investment phases, and the GM can exclude practice
-rounds through the cumulative-period controls.
+Capacity can earn different returns as demand, costs, and classmates' offers
+change. An investment can fall behind the passive outcome in one round and
+exceed it in a later round. Including multiple rounds therefore evaluates the
+sequence of decisions, rather than one isolated outcome. Investing does not
+guarantee a positive score.
 
-## 14. Normal Market and LNG Crisis assumptions
+## 12. Normal Market and LNG Crisis assumptions
 
-### 14.1 Normal Market
+### 12.1 Normal Market
 
 Normal Market uses assigned portfolios and stored base marginal costs, without
-an LNG adjustment or a new Investment-phase capacity charge. Actual clearing
+an LNG crisis adjustment or a new Investment-phase capacity charge. Actual clearing
 uses student offers; the PC benchmark uses full effective capacity and cost.
 
-### 14.2 LNG Crisis
+### 12.2 LNG Crisis
 
 LNG Crisis applies a common period-specific adjustment to gas generators:
 
@@ -719,7 +684,7 @@ New crisis news is revealed only when the current period becomes available
 and its gas adjustment is positive. Future announcements are hidden.
 Previously revealed news remains accessible in history.
 
-### 14.3 Narrative context and student information
+### 12.3 Narrative context and student information
 
 Crisis news gives a shared narrative for the current cost shock while each
 student's portfolio shows their own effective costs. This supports discussion
@@ -733,7 +698,7 @@ Publishing a statement does not change those inputs; the saved market
 configuration remains authoritative. For publication and editing, use the
 [announcement controls](GM_INTERFACE_GUIDE.md#14-publish-student-announcements).
 
-## 15. Capacity Investment assumptions
+## 13. Capacity Investment assumptions
 
 An Investment phase has an investment stage followed by six market periods.
 Students choose additional capacity by technology. Each positive technology
@@ -780,14 +745,14 @@ D_t^0=\alpha_t C_{ref}^{pre-investment}.
 $$
 
 The GM can edit $\alpha_t$ before or during open bidding, until closure. Late
-admission has a separate capacity-scaled recalculation rule in Section 16.
+admission has a separate capacity-scaled recalculation rule in Section 14.
 
 **With optional demand growth switched on**, saved absolute demand quantities
 follow Section 5.4. A newly appended Investment phase continues from the previous
 phase's final demand, with a further growth draw for Investment Period 1 and
 each later period. It does not reset demand to a new percentage of the enlarged
 fleet. Purchases and late admission increase supply without rescaling the saved
-growth path, and the GM cannot edit individual growth-managed periods.
+growth sequence, and the GM cannot edit individual growth-managed periods.
 
 Growth can therefore increase pressure on the system if insufficient capacity
 is added. Whether capacity is actually scarce, and whether an investment earns
@@ -824,10 +789,10 @@ For example, 100 MW of new gas capacity incurs 500 € per Investment market
 period, including a period with zero dispatch. These are simplified teaching
 charges, not annualized capital costs or an upfront purchase payment.
 They are excluded from operating profit and deducted once to obtain actual
-net profit. The Investment score uses that net profit in Section 13; it does
+net profit. The Investment score uses that net profit in Section 11; it does
 not deduct the same charge a second time.
 
-## 16. Enrollment changes and their economic effects
+## 14. Enrollment changes and their economic effects
 
 Initial enrollment determines the GENCOs receiving starting portfolios.
 Late requests remain pending until GM approval; a request alone does not
@@ -860,7 +825,7 @@ Late students do not receive retrospective bids, profits, or benchmark results.
 Their absence from earlier results may leave their cumulative leaderboard score
 unavailable.
 
-## 17. Missing-bid fallback
+## 15. Missing-bid fallback
 
 The administrative missing-bid fallback creates one block for each generator
 without any saved offer when closure with defaults is selected:
@@ -883,7 +848,7 @@ from one inserted through this administrative fallback.
 The [closure instructions](GM_INTERFACE_GUIDE.md#close-bidding) describe how
 to wait for submissions or accept the fallback.
 
-## 18. Portfolio inheritance and experiment continuity
+## 16. Portfolio inheritance and experiment continuity
 
 Appending a phase preserves the same participants, portfolios, and cumulative
 game history. New scenario conditions apply prospectively; completed results
@@ -894,7 +859,7 @@ portfolio ownership, capacities, technologies, and base costs, with optional
 destination-only base-cost overrides. The source game may still be ongoing.
 
 The independent game has fresh auctions and financial history. Earlier bids,
-profits, and temporary LNG adjustments are not copied. Previously acquired
+profits, and temporary LNG crisis adjustments are not copied. Previously acquired
 generators become inherited capacity without reapplying their earlier
 acquisition charges. Their capacity does not enlarge the original baseline
 used to calculate the additional-investment limit.
@@ -904,14 +869,14 @@ cumulative history, or a separate experiment starting from a chosen portfolio.
 They do not guarantee identical results, because demand settings and student
 offers may differ.
 
-## 19. Information, release, and confidentiality
+## 17. Information, release, and confidentiality
 
 The GM controls auction timing, scenario configuration, clearing, and results
 release. Clearing makes an outcome available for GM inspection; release makes
 it available to students.
 
 Students can inspect their own effective generation costs before bidding.
-Future LNG settings are not disclosed in advance. After release, students see
+Future LNG crisis settings are not disclosed in advance. After release, students see
 their own financial outcomes and block-level results.
 
 The student order book may display anonymous market blocks, without other
@@ -924,7 +889,7 @@ Notifications, news history, and screen navigation communicate game state.
 They do not change auction inputs, allocations, or profit formulas.
 Opening a notification is not evidence of submitting a decision.
 
-## 20. Market Coach: purpose, indicators, and interpretation
+## 18. Market Coach: purpose, indicators, and interpretation
 
 Market Coach connects a student's recorded offers with their dispatch and
 financial accounts. Its teaching purpose is to help students distinguish
@@ -932,7 +897,7 @@ offer prices from production costs, installed capacity from accepted supply,
 and operating profit from net profit. It gives observations for discussion,
 not a recommended bidding strategy or an assessment of bidding skill.
 
-### 20.1 Availability and selection of observations
+### 18.1 Availability and selection of observations
 
 Feedback uses the student's own released records and appears only when the
 per-game option is enabled. The
@@ -956,7 +921,7 @@ list of every possible statement. If necessary source results are missing,
 the coach does not invent values or substitute another student's results.
 No AI, random selection, or external analysis service is used.
 
-### 20.2 Offer markups and below-cost offers
+### 18.2 Offer markups and below-cost offers
 
 For GENCO $i$, let $G_i$ contain its generators available in period $t$.
 Using the notation from Section 4, total offered quantity is:
@@ -974,7 +939,7 @@ q^{bid}_{g,k,t}\left(b_{g,k,t}-c_{g,t}\right)}{O_{i,t}}.
 $$
 
 Here, $c_{g,t}$ is the generator's **effective marginal cost for that period**,
-including an applicable LNG adjustment. The indicator is measured in €/MWh
+including an applicable LNG crisis adjustment. The indicator is measured in €/MWh
 and weights **offered quantities**, not dispatched quantities. Zero-MW blocks
 have no weight. If all saved quantities are zero, the coach states that no
 quantity-weighted markup can be calculated; it does not report a fabricated zero.
@@ -1004,7 +969,7 @@ These calculations include the period's recorded offers, including any
 administrative missing-bid defaults. The coach does not infer whether a
 zero-price offer was a deliberate strategy or a missing-bid fallback.
 
-### 20.3 Dispatch, utilization, and unused capacity
+### 18.3 Dispatch, utilization, and unused capacity
 
 Define effective portfolio capacity and actual portfolio dispatch as:
 
@@ -1030,7 +995,7 @@ that offering more would have increased profit. Different offers can change
 the clearing price and the allocation of dispatch. No alternative clearing
 is performed by Market Coach.
 
-### 20.4 Operating profit, negative margins, and investment charges
+### 18.4 Operating profit, negative margins, and investment charges
 
 The operating observation reconciles the accounts defined in Section 9.
 It identifies a generator with a negative realized production margin
@@ -1047,14 +1012,14 @@ positive total operating profit while an individual generator makes a loss.
 With zero dispatch, operating revenue and variable generation costs are zero.
 
 When an Investment capacity charge is positive, the same observation also
-reports the stored charge and net result using Section 15's accounting.
+reports the stored charge and net result using Section 13's accounting.
 
 For example, 2,000 € operating profit with a 3,000 € capacity charge gives a
 net loss of 1,000 €. Charges apply to eligible acquired capacity even when
 unused, so zero dispatch need not imply zero net loss. The coach describes
-these accounts; it does not change the leaderboard calculation in Section 13.
+these accounts; it does not change the leaderboard calculation in Section 11.
 
-### 20.5 LNG cost shocks: accounting effect versus counterfactual effect
+### 18.5 LNG crisis cost shocks: accounting effect versus counterfactual effect
 
 For a student's gas generator, the coach uses the frozen base and effective
 costs for the selected period:
@@ -1087,7 +1052,7 @@ No gas observation appears for a zero adjustment or for a student without an
 affected gas generator. Historical feedback uses that period's saved cost
 snapshots, not the current or a future period's configuration.
 
-### 20.6 Comparison with the student's previous period
+### 18.6 Comparison with the student's previous period
 
 When no gas observation is selected, the coach considers the student's most
 recent earlier **released** result in the **same phase**. It compares only
@@ -1115,7 +1080,7 @@ observation. The comparison uses released history independently of whether a
 period is included in the cumulative leaderboard; excluding a practice round
 from ranking does not erase its results.
 
-### 20.7 Numerical conventions, confidentiality, and teaching limits
+### 18.7 Numerical conventions, confidentiality, and teaching limits
 
 Coach figures are formatted to at most two decimal places. A small numerical
 tolerance of $10^{-7}$ is used when testing positive quantities and below-cost
@@ -1128,14 +1093,14 @@ saved data and setting, the observations are deterministic. The student's
 authenticated session determines whose accounts are read. Coaching text does
 not expose another student's offers, generator ownership, portfolio, profit,
 identity, or leaderboard position. Ordinary result-graph and leaderboard
-visibility remains as described in Section 19.
+visibility remains as described in Section 17.
 
 Market Coach supplies no optimal offer, profit forecast, counterfactual market
 result, or personalized ranking explanation. It does not change bids, demand,
 clearing, settlement, or scores. The GM can use the observations as prompts
 for discussing the accounts and graph, rather than as a verdict on strategy.
 
-## 21. Interpretation and model boundaries
+## 19. Interpretation and model boundaries
 
 Normal Market illustrates the effects of prices and offered quantities under
 stable generation costs. LNG Crisis introduces a controlled gas-cost shock.
