@@ -889,7 +889,7 @@ Notifications, news history, and screen navigation communicate game state.
 They do not change auction inputs, allocations, or profit formulas.
 Opening a notification is not evidence of submitting a decision.
 
-## 18. Market Coach: purpose, indicators, and interpretation
+## 18. Market Coach: purpose, indicators, and interpretation (Not very usefull)
 
 Market Coach connects a student's recorded offers with their dispatch and
 financial accounts. Its teaching purpose is to help students distinguish
