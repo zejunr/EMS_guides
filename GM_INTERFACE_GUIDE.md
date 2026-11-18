@@ -388,19 +388,7 @@ game before running its auctions.
 For what is inherited and how histories remain separate, see
 [GM Guide, Section 16](GM_GUIDE.md#16-portfolio-inheritance-and-experiment-continuity).
 
-## 13. Enable Market Coach
-
-Select the game and find **Market Coach**. Check **Enable Market Coach** and
-wait for **Market Coach enabled.** Uncheck it to disable feedback for that game.
-
-After results are released, students can expand **Market Coach** in that
-period's Results, including history. If it is absent, confirm the setting
-saved, the student is in the correct game, and the period is released.
-
-Use [GM Guide, Section 18](GM_GUIDE.md#18-market-coach-purpose-indicators-and-interpretation)
-for the feedback rules and how to discuss the observations.
-
-## 14. Publish student announcements
+## 13. Publish student announcements
 
 In **Student announcements**:
 
@@ -419,7 +407,7 @@ withdraw a message from their active news history.
 LNG crisis announcements are configured separately through
 [the crisis controls](#8-run-an-lng-crisis-phase).
 
-## 15. Help students recover a Player Code
+## 14. Help students recover a Player Code
 
 Email recovery requires the platform administrator to configure delivery.
 Have students verify their address while they still have access:
@@ -445,7 +433,7 @@ Unrecognized or unverified addresses receive the same generic request message;
 that message alone does not confirm an email was sent. Ask the administrator
 for help if a verified address repeatedly receives nothing.
 
-## 16. Troubleshoot a classroom session
+## 15. Troubleshoot a classroom session
 
 | Situation | Check or action |
 |---|---|
@@ -463,7 +451,7 @@ for help if a verified address repeatedly receives nothing.
 | The server is unavailable | Check connectivity and contact the platform administrator. |
 | You need a break | Check active timers and bidding; closing your browser does not stop them. |
 
-## 17. Finish a session
+## 16. Finish a session
 
 Release the final results and allow students to review them. Keep the game if
 you will revisit its history or use its portfolio as a source. Sign out on
