@@ -57,8 +57,7 @@ Selecting a historical period changes the displayed results; it does not
 reopen bidding. Check the phase and period shown in an action's confirmation.
 Period numbers restart at 1 in each phase.
 
-Use the account button to change your password and **Sign out** when finished.
-If you forget your GM login, contact the platform administrator.
+Use the account button to change your password and **Sign out** when finished. New and replacement passwords must contain 10-256 characters, including an uppercase letter, a number, and a symbol. If you forget your GM login, contact the platform administrator, who can create a one-time password-reset link.
 
 ## 3. Create a game
 
