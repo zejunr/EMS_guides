@@ -2,9 +2,7 @@
 
 ## Economic Intuition, Assumptions, and KPI Methodology
 
-**Edition:** 18 November 2026 — browser and iOS platform, including three-block
-bidding, euro leaderboard scoring, and optional Market Coach feedback.
-Individual games retain their saved settings, which may differ from the defaults.
+**Edition:** 18 November 2026 
 
 ## 1. Purpose and scope
 
