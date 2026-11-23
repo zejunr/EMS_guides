@@ -784,11 +784,11 @@ $$
 $$
 
 For example, 100 MW of new gas capacity incurs 500 € per Investment market
-period, including a period with zero dispatch. These are simplified teaching
-charges, not annualized capital costs or an upfront purchase payment.
-They are excluded from operating profit and deducted once to obtain actual
-net profit. The Investment score uses that net profit in Section 11; it does
-not deduct the same charge a second time.
+period, including a period with zero dispatch. 
+
+Capacity charges represent the hourly equivalent of the plant's construction cost, spread over its assumed lifetime and including the cost of capital. Each trading round represents one hour, so newly purchased capacity incurs this charge every round, even when it produces no electricity. The game covers operating hours within that lifetime; it does not simulate the full repayment period.
+
+Capacity charges are excluded from operating profit and deducted once to obtain actual net profit. The Investment score uses that net profit in Section 11; it does not deduct the same charge a second time.
 
 ## 14. Enrollment changes and their economic effects
 
